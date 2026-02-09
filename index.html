@@ -28,18 +28,26 @@ th, td { border: 1px solid #ccc; padding: 6px 10px; }
 <table id="table"></table>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxWhLDPXGk4dxSeXcul1NpSMGegIjh00kn7UmDoZHJc2te0r9bjJtN0QifeRAtbCQmT/exec
-';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxWhLDPXGk4dxSeXcul1NpSMGegIjh00kn7UmDoZHJc2te0r9bjJtN0QifeRAtbCQmT/exec';
 
 function save() {
   const data = {
-    nickname: nickname.value,
-    archer: archer.value,
-    spear: spear.value,
-    cavalry: cavalry.value,
-    shield: shield.value,
-    count: count.value
+    nickname: document.getElementById('nickname').value,
+    archer: document.getElementById('archer').value,
+    spear: document.getElementById('spear').value,
+    cavalry: document.getElementById('cavalry').value,
+    shield: document.getElementById('shield').value,
+    count: document.getElementById('count').value
   };
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(() => {
+    alert('저장 완료');
+    load();
+  });
+}
 
   fetch(API_URL, {
     method: 'POST',
