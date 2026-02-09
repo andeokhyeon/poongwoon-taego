@@ -5,121 +5,110 @@
 <title>풍운 태고 병력표</title>
 <style>
 body {
-  font-family: 'Pretendard', Arial;
-  background: #f4f6fb;
+  font-family: Pretendard, Arial;
+  background: #f8fafc;
   padding: 30px;
 }
-.container {
+.card {
   background: white;
   padding: 20px;
+  max-width: 420px;
   border-radius: 12px;
-  max-width: 900px;
-  margin: auto;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-label {
-  font-weight: 600;
-  display: block;
-  margin-top: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,.08);
 }
 input {
   width: 100%;
-  padding: 8px;
-  margin-top: 4px;
+  padding: 10px;
+  margin: 6px 0;
 }
 button {
-  padding: 10px 16px;
-  margin-top: 15px;
-  border: none;
-  border-radius: 6px;
+  padding: 10px;
+  margin-top: 8px;
+  width: 100%;
   cursor: pointer;
 }
-.save { background:#4f46e5; color:white; }
-.delete { background:#ef4444; color:white; margin-left:8px; }
-.admin { background:#22c55e; color:white; margin-left:8px; }
-
 table {
+  margin-top: 20px;
   width: 100%;
   border-collapse: collapse;
-  margin-top: 25px;
 }
-th, td {
-  border-bottom: 1px solid #ddd;
-  padding: 10px;
+th,td {
+  border: 1px solid #ddd;
+  padding: 8px;
   text-align: center;
-}
-th {
-  background: #eef2ff;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
-<h2>⚔️ 풍운 태고 병력표</h2>
 
-<label>닉네임</label>
-<input id="nickname">
+<div class="card">
+<h3>풍운 태고 병력 입력</h3>
 
-<label>창병</label>
-<input id="spear">
-<label>궁병</label>
-<input id="archer">
-<label>방패병</label>
-<input id="shield">
-<label>기병</label>
-<input id="cavalry">
-<label>병부 수량</label>
-<input id="count">
+<input id="nickname" placeholder="닉네임">
+<input id="spear" placeholder="창병">
+<input id="archer" placeholder="궁병">
+<input id="shield" placeholder="방패병">
+<input id="cavalry" placeholder="기병">
+<input id="count" placeholder="병부">
 
-<button class="save" onclick="save()">입력 / 업데이트</button>
-<button class="delete" onclick="remove()">삭제</button>
-<button class="admin" onclick="window.open(location.href)">운영진 조회</button>
+<button onclick="save()">저장 / 업데이트</button>
+<button onclick="remove()">삭제</button>
+<button onclick="window.open('admin.html','_blank')">운영진 조회</button>
 
 <table id="table"></table>
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwvcaFq2aEBsoHrBI67MfyrKmgCYbPgl6P6oII5C8xRj3V-P2fOlHZd1jZVXnvvuJls/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzaIF5qvsVjrzJVosl9eMlSvB1BT3GrXgFztZqtILI7Q4vq-nTfuKZT6kDBDtM-cNo/exec';
 
 function save() {
-  fetch(API, {
+  fetch(API_URL,{
     method:'POST',
     body: JSON.stringify({
-      nickname: nickname.value,
-      spear: spear.value,
-      archer: archer.value,
-      shield: shield.value,
-      cavalry: cavalry.value,
-      count: count.value
+      nickname:nickname.value,
+      spear:spear.value,
+      archer:archer.value,
+      shield:shield.value,
+      cavalry:cavalry.value,
+      count:count.value
     })
   }).then(load);
 }
 
 function remove() {
   const pw = prompt('비밀번호 입력');
-  fetch(API, {
+  fetch(API_URL,{
     method:'POST',
     body: JSON.stringify({
-      nickname: nickname.value,
-      password: pw,
-      _method:'DELETE'
+      nickname:nickname.value,
+      password: pw
     })
   }).then(load);
 }
 
 function load() {
-  fetch(API).then(r=>r.json()).then(rows=>{
-    table.innerHTML =
-      `<tr>
-        <th>닉네임</th><th>창병</th><th>궁병</th>
-        <th>방패병</th><th>기병</th><th>병부</th><th>최종업데이트</th>
-      </tr>` +
-      rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
-  });
+  fetch(API_URL)
+    .then(r=>r.json())
+    .then(rows=>{
+      table.innerHTML =
+        `<tr>
+          <th>닉네임</th>
+          <th>창</th>
+          <th>궁</th>
+          <th>방</th>
+          <th>기</th>
+          <th>병부</th>
+          <th>업데이트</th>
+        </tr>` +
+        rows.map(r =>
+          `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`
+        ).join('');
+    });
 }
 
 load();
 </script>
+
 </body>
 </html>
