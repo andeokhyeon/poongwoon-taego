@@ -6,160 +6,207 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  padding: 16px;
-  max-width: 900px;
-  margin: auto;
-}
-h2 { text-align: center; }
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0;
-  box-sizing: border-box;
+:root{
+  --main:#4f8cff;
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#222;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+body{
+  margin:0;
+  font-family: "Apple SD Gothic Neo", Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  font-size: 15px;
-  cursor: pointer;
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
 }
 
-.admin {
-  background: #222;
-  color: #fff;
+h2{
+  text-align:center;
+  margin-bottom:20px;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  font-size: 14px;
-}
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
-}
-th {
-  background: #f4f4f4;
-  cursor: pointer;
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
 }
 
-@media (max-width: 600px) {
-  .grid { grid-template-columns: 1fr; }
+label{
+  font-size:13px;
+  font-weight:600;
+  margin-top:10px;
+  display:block;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:4px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  font-size:15px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.btn-main{ background:var(--main); color:#fff; }
+.btn-sub{ background:#e9efff; color:#2b5cff; }
+.btn-danger{ background:#ff4d4f; color:#fff; }
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+  font-size:14px;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+}
+
+th{
+  background:#f0f4ff;
+  cursor:pointer;
+}
+
+@media(max-width:600px){
+  .grid{ grid-template-columns:1fr; }
 }
 </style>
 </head>
-<body>
 
+<body>
+<div class="container">
 <h2>풍운 태고 병력표</h2>
 
-<input id="nickname" placeholder="닉네임">
+<div class="card">
+  <label>닉네임</label>
+  <input id="nickname">
 
-<div class="grid">
-  <input id="archer" placeholder="궁병">
-  <input id="spear" placeholder="창병">
-  <input id="cavalry" placeholder="기병">
-  <input id="shield" placeholder="방패">
+  <div class="grid">
+    <div>
+      <label>궁병</label>
+      <input id="archer">
+    </div>
+    <div>
+      <label>창병</label>
+      <input id="spear">
+    </div>
+    <div>
+      <label>기병</label>
+      <input id="cavalry">
+    </div>
+    <div>
+      <label>방패병</label>
+      <input id="shield">
+    </div>
+  </div>
+
+  <label>병부 수량</label>
+  <input id="count">
+
+  <button class="btn-main" onclick="save()">입력 / 업데이트</button>
+  <button class="btn-sub" onclick="load()">조회하기</button>
+  <button class="btn-danger" onclick="removeData()">삭제</button>
+  <button class="btn-sub" onclick="adminView()">운영진 전체조회</button>
 </div>
 
-<input id="count" placeholder="병부 수량">
-
-<button onclick="save()">입력 / 업데이트</button>
-<button onclick="load()">조회하기</button>
-<button class="admin" onclick="adminView()">운영진 전체조회</button>
-
 <table id="table"></table>
+</div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxRCCWakieLXWBquhd1-zmc435AXJDRxgjpvMz-nI4KTR507FaIWXGLBYE8lT5w6Jl1/exec';
+const API_URL = "https://script.google.com/macros/s/AKfycbziZj_ql1njCcKm6S6kWwWBMLBofNGWVIBn9R1GrLxFdvUEkH-UVbVp3e7nNtubI9ZL/exec";
 
-let currentRows = [];
-let sortIndex = 0;
-let desc = true;
+let rowsCache=[];
+let sortIdx=0, desc=true;
 
-/* 자동 조회 */
 window.onload = load;
 
-/* 저장 */
-function save() {
-  const data = {
-    nickname: nickname.value,
-    archer: archer.value,
-    spear: spear.value,
-    cavalry: cavalry.value,
-    shield: shield.value,
-    count: count.value
+function save(){
+  const data={
+    nickname:nickname.value,
+    archer:archer.value,
+    spear:spear.value,
+    cavalry:cavalry.value,
+    shield:shield.value,
+    count:count.value
   };
+  fetch(API_URL,{method:'POST',body:JSON.stringify(data)})
+  .then(()=>{ alert("저장 완료"); load();});
+}
 
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }).then(() => {
-    alert('저장 완료');
-    load();
+function removeData(){
+  const pw=prompt("삭제 비밀번호 입력");
+  if(pw!=="6575") return alert("비밀번호 틀림");
+  fetch(API_URL,{
+    method:'POST',
+    body:JSON.stringify({delete:nickname.value})
+  }).then(()=>{ alert("삭제 완료"); load();});
+}
+
+function load(){
+  fetch(API_URL)
+  .then(r=>r.json())
+  .then(rows=>{
+    rowsCache=rows;
+    render(rows);
   });
 }
 
-/* 조회 */
-function load() {
-  fetch(API_URL)
-    .then(r => r.json())
-    .then(rows => {
-      currentRows = rows;
-      render(rows);
-    });
+function render(rows){
+  table.innerHTML=
+  `<tr>
+    <th onclick="sortBy(0)">닉네임</th>
+    <th onclick="sortBy(2)">창병</th>
+    <th onclick="sortBy(1)">궁병</th>
+    <th onclick="sortBy(4)">방패</th>
+    <th onclick="sortBy(3)">기병</th>
+    <th onclick="sortBy(5)">병부</th>
+    <th onclick="sortBy(6)">최종 업데이트</th>
+  </tr>`+
+  rows.map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('');
 }
 
-/* 테이블 렌더 */
-function render(rows) {
-  table.innerHTML =
-    `<tr>
-      <th onclick="sortBy(0)">닉</th>
-      <th onclick="sortBy(1)">궁</th>
-      <th onclick="sortBy(2)">창</th>
-      <th onclick="sortBy(3)">기</th>
-      <th onclick="sortBy(4)">방</th>
-      <th onclick="sortBy(5)">병부</th>
-    </tr>` +
-    rows.map(r =>
-      `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`
-    ).join('');
+function sortBy(i){
+  if(sortIdx===i) desc=!desc;
+  else{ sortIdx=i; desc=true;}
+  rowsCache.sort((a,b)=>{
+    if(i===0||i===6) return desc? b[i].localeCompare(a[i]):a[i].localeCompare(b[i]);
+    return desc? b[i]-a[i]:a[i]-b[i];
+  });
+  render(rowsCache);
 }
 
-/* 정렬 */
-function sortBy(i) {
-  if (sortIndex === i) desc = !desc;
-  else { sortIndex = i; desc = true; }
-
-  currentRows.sort((a,b) =>
-    desc ? b[i] - a[i] || b[i].localeCompare?.(a[i]) 
-         : a[i] - b[i] || a[i].localeCompare?.(b[i])
-  );
-  render(currentRows);
-}
-
-/* 운영진 전체조회 */
-function adminView() {
-  const pw = prompt('운영진 비밀번호 입력');
-  if (pw !== '6575') {
-    alert('비밀번호 틀림');
-    return;
-  }
-  load();
+function adminView(){
+  const pw=prompt("운영진 비밀번호");
+  if(pw!=="6575") return alert("비밀번호 틀림");
+  window.open(location.href,'_blank');
 }
 </script>
-
 </body>
 </html>
+
