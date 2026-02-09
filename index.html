@@ -10,7 +10,7 @@ body {
   padding:30px;
 }
 .card {
-  max-width:420px;
+  max-width:480px;
   margin:auto;
   background:#fff;
   padding:24px;
@@ -32,6 +32,25 @@ button {
   padding:12px;
   margin-top:10px;
   cursor:pointer;
+}
+#msg {
+  margin-top:10px;
+  color:#16a34a;
+  font-weight:600;
+}
+table {
+  margin-top:20px;
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+th,td {
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center;
+}
+th {
+  background:#f8fafc;
 }
 </style>
 </head>
@@ -55,17 +74,21 @@ button {
 <div class="label">기병</div>
 <input id="cavalry">
 
-<div class="label">병부 수량</div>
+<div class="label">병부</div>
 <input id="count">
 
 <button onclick="save()">저장 / 업데이트</button>
-<button onclick="openAdmin()">운영진 조회</button>
+<button onclick="removeRow()">삭제</button>
+
+<div id="msg"></div>
+
+<table id="table"></table>
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbzxs4xP3Emg53PlNmYItDbxJvytMYGmJrnjHJCPU93xzKrwmrmUMgifBFMiRSv6okw/exec';
+const API_URL = '👉 네 웹앱 URL 👈';
 
-function save(){
+function save() {
   fetch(API_URL,{
     method:'POST',
     body:JSON.stringify({
@@ -76,17 +99,52 @@ function save(){
       cavalry:cavalry.value,
       count:count.value
     })
-  }).then(()=>alert('저장 완료'));
+  }).then(()=>{
+    msg.innerText = '완료되었습니다.';
+    load();
+  });
 }
 
-function openAdmin(){
-  const pw = prompt('운영진 비밀번호 입력');
-  if(pw === '6575'){
-    window.open('admin.html','_blank');
-  } else {
-    alert('비밀번호 틀림');
+function removeRow() {
+  if (!nickname.value) {
+    alert('닉네임을 입력하세요');
+    return;
   }
+
+  fetch(API_URL,{
+    method:'POST',
+    body:JSON.stringify({
+      action:'delete',
+      nickname:nickname.value
+    })
+  }).then(()=>{
+    msg.innerText = '삭제되었습니다.';
+    load();
+  });
 }
+
+function load() {
+  fetch(API_URL)
+    .then(r=>r.json())
+    .then(rows=>{
+      table.innerHTML =
+      `<tr>
+        <th>닉네임</th>
+        <th>창병</th>
+        <th>궁병</th>
+        <th>방패병</th>
+        <th>기병</th>
+        <th>병부</th>
+        <th>업데이트</th>
+      </tr>` +
+      rows.map(r =>
+        `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`
+      ).join('');
+    });
+}
+
+load();
 </script>
 </body>
 </html>
+
