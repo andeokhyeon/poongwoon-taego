@@ -5,117 +5,74 @@
 <title>풍운 태고 병력표</title>
 <style>
 body {
-  background: radial-gradient(circle at top, #1e293b, #020617);
-  font-family: Pretendard, Arial;
-  color: #e5e7eb;
-  padding: 30px;
+  background:#0e1621;
+  color:#fff;
+  font-family:'Segoe UI';
+  padding:30px;
 }
-.card {
-  max-width: 520px;
-  margin: auto;
-  background: linear-gradient(180deg, #0f172a, #020617);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.6);
-}
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-.label {
-  font-size: 13px;
-  color: #94a3b8;
-  margin-top: 12px;
+input, button {
+  padding:10px;
+  margin:4px;
+  border-radius:6px;
+  border:none;
 }
 input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 4px;
-  background: #020617;
-  border: 1px solid #334155;
-  color: #e5e7eb;
-  border-radius: 6px;
+  width:120px;
 }
 button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  background: linear-gradient(90deg, #22c55e, #16a34a);
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
+  background:#2d8cff;
+  color:white;
+  cursor:pointer;
 }
-button.admin {
-  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-}
-button.delete {
-  background: linear-gradient(90deg, #ef4444, #dc2626);
-}
-#msg {
-  margin-top: 10px;
-  text-align: center;
-  color: #22c55e;
-}
+button:hover { background:#1c6fd5; }
 table {
-  width: 100%;
-  margin-top: 20px;
-  border-collapse: collapse;
-  font-size: 13px;
+  margin-top:20px;
+  border-collapse:collapse;
+  width:100%;
 }
 th, td {
-  padding: 8px;
-  border-bottom: 1px solid #334155;
-  text-align: center;
+  border:1px solid #444;
+  padding:8px;
+  text-align:center;
 }
-th {
-  color: #38bdf8;
+.notice {
+  color:#6aff8a;
+  margin-top:10px;
 }
 </style>
 </head>
-
 <body>
-<div class="card">
-<h2>⚔️ 풍운 태고 병력표</h2>
 
-<div class="label">닉네임</div>
-<input id="nickname">
+<h2>풍운 태고 병력표</h2>
 
-<div class="label">창병</div>
-<input id="spear">
+<div>
+  <label>닉네임</label><br>
+  <input id="nickname"><br>
+  <label>창병</label>
+  <label>궁병</label>
+  <label>방패</label>
+  <label>기병</label>
+  <label>병부</label><br>
+  <input id="spear">
+  <input id="archer">
+  <input id="shield">
+  <input id="cavalry">
+  <input id="count"><br>
 
-<div class="label">궁병</div>
-<input id="archer">
-
-<div class="label">방패병</div>
-<input id="shield">
-
-<div class="label">기병</div>
-<input id="cavalry">
-
-<div class="label">병부</div>
-<input id="count">
-
-<button onclick="save()">저장 / 업데이트</button>
-<button class="delete" onclick="removeRow()">삭제</button>
-<button class="admin" onclick="openAdmin()">운영진 조회</button>
-
-<div id="msg"></div>
-
-<table id="table"></table>
+  <button onclick="save()">입력 / 업데이트</button>
+  <button onclick="remove()">삭제</button>
+  <button onclick="admin()">운영진 조회</button>
 </div>
 
+<div class="notice" id="msg"></div>
+
+<table id="table"></table>
+
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbyRCVoSZJO48nN_nCSd8qVy5y4GY6VyPBQ1tY3qTTogR40l69iMSf4xbXynB4kw51Pl/exec';
+const API = 'YOUR_EXEC_URL';
 
-function formatDate(v){
-  if(!v) return '';
-  const d = new Date(v);
-  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-}
-
-function save(){
-  fetch(API_URL,{
+function save() {
+  fetch(API, {
     method:'POST',
     body:JSON.stringify({
       nickname:nickname.value,
@@ -126,60 +83,44 @@ function save(){
       count:count.value
     })
   }).then(()=>{
-    msg.innerText = '완료되었습니다.';
+    msg.innerText = '✅ 입력이 완료되었습니다.';
     load();
   });
 }
 
-function removeRow(){
-  fetch(API_URL,{
+function remove() {
+  fetch(API, {
     method:'POST',
     body:JSON.stringify({
-      action:'delete',
-      nickname:nickname.value
+      nickname:nickname.value,
+      action:'delete'
     })
   }).then(()=>{
-    msg.innerText = '삭제되었습니다.';
+    msg.innerText = '🗑 삭제되었습니다.';
     load();
   });
 }
 
-function openAdmin(){
-  const pw = prompt('운영진 비밀번호');
-  if(pw === '6575'){
-    window.open('admin.html','_blank');
-  }
+function load() {
+  fetch(API).then(r=>r.json()).then(rows=>{
+    table.innerHTML =
+      `<tr>
+        <th>닉네임</th><th>창병</th><th>궁병</th>
+        <th>방패</th><th>기병</th><th>병부</th><th>업데이트</th>
+      </tr>` +
+      rows.map(r=>`
+        <tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>
+      `).join('');
+  });
 }
 
-function load(){
-  fetch(API_URL)
-    .then(r=>r.json())
-    .then(rows=>{
-      table.innerHTML =
-      `<tr>
-        <th>닉네임</th>
-        <th>창</th>
-        <th>궁</th>
-        <th>방</th>
-        <th>기</th>
-        <th>병부</th>
-        <th>업데이트</th>
-      </tr>` +
-      rows.map(r =>
-        `<tr>
-          <td>${r[0]}</td>
-          <td>${r[1]}</td>
-          <td>${r[2]}</td>
-          <td>${r[3]}</td>
-          <td>${r[4]}</td>
-          <td>${r[5]}</td>
-          <td>${formatDate(r[6])}</td>
-        </tr>`
-      ).join('');
-    });
+function admin() {
+  const pw = prompt('비밀번호 입력');
+  if (pw === '6575') window.open('admin.html','_blank');
 }
 
 load();
 </script>
 </body>
 </html>
+
