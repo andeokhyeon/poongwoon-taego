@@ -5,67 +5,70 @@
 <title>풍운 태고 병력표</title>
 <style>
 body {
-  font-family: Pretendard, Arial;
-  background: #f8fafc;
-  padding: 30px;
+  background:#f1f5f9;
+  font-family:Pretendard, Arial;
+  padding:30px;
 }
 .card {
-  background: white;
-  padding: 20px;
-  max-width: 420px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,.08);
+  max-width:420px;
+  margin:auto;
+  background:#fff;
+  padding:24px;
+  border-radius:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+}
+.label {
+  font-size:13px;
+  color:#475569;
+  margin-top:12px;
 }
 input {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0;
+  width:100%;
+  padding:10px;
+  margin-top:4px;
 }
 button {
-  padding: 10px;
-  margin-top: 8px;
-  width: 100%;
-  cursor: pointer;
-}
-table {
-  margin-top: 20px;
-  width: 100%;
-  border-collapse: collapse;
-}
-th,td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
-
 <div class="card">
 <h3>풍운 태고 병력 입력</h3>
 
-<input id="nickname" placeholder="닉네임">
-<input id="spear" placeholder="창병">
-<input id="archer" placeholder="궁병">
-<input id="shield" placeholder="방패병">
-<input id="cavalry" placeholder="기병">
-<input id="count" placeholder="병부">
+<div class="label">닉네임</div>
+<input id="nickname">
+
+<div class="label">창병</div>
+<input id="spear">
+
+<div class="label">궁병</div>
+<input id="archer">
+
+<div class="label">방패병</div>
+<input id="shield">
+
+<div class="label">기병</div>
+<input id="cavalry">
+
+<div class="label">병부 수량</div>
+<input id="count">
 
 <button onclick="save()">저장 / 업데이트</button>
-<button onclick="remove()">삭제</button>
-<button onclick="window.open('admin.html','_blank')">운영진 조회</button>
-
-<table id="table"></table>
+<button onclick="openAdmin()">운영진 조회</button>
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbzaIF5qvsVjrzJVosl9eMlSvB1BT3GrXgFztZqtILI7Q4vq-nTfuKZT6kDBDtM-cNo/exec';
+const API_URL = '여기에_네_웹앱_URL';
 
-function save() {
+function save(){
   fetch(API_URL,{
     method:'POST',
-    body: JSON.stringify({
+    body:JSON.stringify({
       nickname:nickname.value,
       spear:spear.value,
       archer:archer.value,
@@ -73,42 +76,17 @@ function save() {
       cavalry:cavalry.value,
       count:count.value
     })
-  }).then(load);
+  }).then(()=>alert('저장 완료'));
 }
 
-function remove() {
-  const pw = prompt('비밀번호 입력');
-  fetch(API_URL,{
-    method:'POST',
-    body: JSON.stringify({
-      nickname:nickname.value,
-      password: pw
-    })
-  }).then(load);
+function openAdmin(){
+  const pw = prompt('운영진 비밀번호 입력');
+  if(pw === '6575'){
+    window.open('admin.html','_blank');
+  } else {
+    alert('비밀번호 틀림');
+  }
 }
-
-function load() {
-  fetch(API_URL)
-    .then(r=>r.json())
-    .then(rows=>{
-      table.innerHTML =
-        `<tr>
-          <th>닉네임</th>
-          <th>창</th>
-          <th>궁</th>
-          <th>방</th>
-          <th>기</th>
-          <th>병부</th>
-          <th>업데이트</th>
-        </tr>` +
-        rows.map(r =>
-          `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`
-        ).join('');
-    });
-}
-
-load();
 </script>
-
 </body>
 </html>
