@@ -5,68 +5,63 @@
 <title>풍운 태고 병력표</title>
 <style>
 body { font-family: Arial; padding: 20px; }
-input, button { margin: 5px; padding: 6px; }
+input { margin: 4px; }
+button { margin: 6px 0; }
 table { border-collapse: collapse; margin-top: 20px; }
 th, td { border: 1px solid #ccc; padding: 6px 10px; }
-th { background: #eee; }
 </style>
 </head>
 <body>
 
 <h2>풍운 태고 병력표</h2>
 
-<input id="nickname" placeholder="닉네임">
-<input id="gung" placeholder="궁">
-<input id="chang" placeholder="창">
-<input id="gi" placeholder="기">
-<input id="bang" placeholder="방">
-<input id="byungbu" placeholder="병부">
-<button onclick="submitData()">등록</button>
+<input id="nickname" placeholder="닉네임"><br>
+<input id="archer" placeholder="궁병">
+<input id="spear" placeholder="창병">
+<input id="cavalry" placeholder="기병">
+<input id="shield" placeholder="방패">
+<input id="count" placeholder="병부수량"><br>
 
-<br><br>
-<button onclick="loadData()">조회하기</button>
+<button onclick="save()">입력 / 업데이트</button>
+<button onclick="load()">조회하기</button>
 
 <table id="table"></table>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAzHK1XUjBOmLoxlJV99Dn1fwoUouykVQDkoMb6idhTHscC30NgaP19sqZUJaF6Wfd/exec";
+const API_URL = 'AKfycbxWhLDPXGk4dxSeXcuI1NpSMGeqljh00kn7UmDoZHJc2te0r9biJtN0QifeRAtbCQmT';
 
-function submitData() {
+function save() {
   const data = {
     nickname: nickname.value,
-    gung: gung.value,
-    chang: chang.value,
-    gi: gi.value,
-    bang: bang.value,
-    byungbu: byungbu.value
+    archer: archer.value,
+    spear: spear.value,
+    cavalry: cavalry.value,
+    shield: shield.value,
+    count: count.value
   };
 
-  fetch(SCRIPT_URL, {
-    method: "POST",
+  fetch(API_URL, {
+    method: 'POST',
     body: JSON.stringify(data)
   }).then(() => {
-    alert("등록 완료");
-    loadData();
+    alert('저장 완료');
+    load();
   });
 }
 
-function loadData() {
-  fetch(SCRIPT_URL)
-    .then(res => res.json())
-    .then(data => {
-      let html = "<tr>";
-      data[0].forEach(h => html += `<th>${h}</th>`);
-      html += "</tr>";
-
-      for (let i = 1; i < data.length; i++) {
-        html += "<tr>";
-        data[i].forEach(c => html += `<td>${c}</td>`);
-        html += "</tr>";
-      }
-      table.innerHTML = html;
+function load() {
+  fetch(API_URL)
+    .then(r => r.json())
+    .then(rows => {
+      table.innerHTML =
+        '<tr><th>닉</th><th>궁</th><th>창</th><th>기</th><th>방</th><th>병부</th></tr>' +
+        rows.map(r =>
+          `<tr><td>${r.join('</td><td>')}</td></tr>`
+        ).join('');
     });
 }
 </script>
 
 </body>
 </html>
+
