@@ -3,210 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <title>풍운 태고 병력표</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-:root{
-  --main:#4f8cff;
-  --bg:#f5f7fb;
-  --card:#ffffff;
-  --text:#222;
+body {
+  font-family: 'Pretendard', Arial;
+  background: #f4f6fb;
+  padding: 30px;
 }
-
-body{
-  margin:0;
-  font-family: "Apple SD Gothic Neo", Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
-
-.container{
-  max-width:900px;
-  margin:auto;
-  padding:20px;
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 10px;
 }
-
-h2{
-  text-align:center;
-  margin-bottom:20px;
+input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
 }
-
-.card{
-  background:var(--card);
-  border-radius:14px;
-  padding:16px;
-  box-shadow:0 6px 20px rgba(0,0,0,.08);
+button {
+  padding: 10px 16px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
+.save { background:#4f46e5; color:white; }
+.delete { background:#ef4444; color:white; margin-left:8px; }
+.admin { background:#22c55e; color:white; margin-left:8px; }
 
-label{
-  font-size:13px;
-  font-weight:600;
-  margin-top:10px;
-  display:block;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 25px;
 }
-
-input{
-  width:100%;
-  padding:12px;
-  margin-top:4px;
-  border-radius:10px;
-  border:1px solid #ddd;
-  font-size:15px;
+th, td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
 }
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-
-button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border:none;
-  border-radius:12px;
-  font-size:15px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.btn-main{ background:var(--main); color:#fff; }
-.btn-sub{ background:#e9efff; color:#2b5cff; }
-.btn-danger{ background:#ff4d4f; color:#fff; }
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-  font-size:14px;
-}
-
-th,td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-  text-align:center;
-}
-
-th{
-  background:#f0f4ff;
-  cursor:pointer;
-}
-
-@media(max-width:600px){
-  .grid{ grid-template-columns:1fr; }
+th {
+  background: #eef2ff;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-<h2>풍운 태고 병력표</h2>
+<h2>⚔️ 풍운 태고 병력표</h2>
 
-<div class="card">
-  <label>닉네임</label>
-  <input id="nickname">
+<label>닉네임</label>
+<input id="nickname">
 
-  <div class="grid">
-    <div>
-      <label>궁병</label>
-      <input id="archer">
-    </div>
-    <div>
-      <label>창병</label>
-      <input id="spear">
-    </div>
-    <div>
-      <label>기병</label>
-      <input id="cavalry">
-    </div>
-    <div>
-      <label>방패병</label>
-      <input id="shield">
-    </div>
-  </div>
+<label>창병</label>
+<input id="spear">
+<label>궁병</label>
+<input id="archer">
+<label>방패병</label>
+<input id="shield">
+<label>기병</label>
+<input id="cavalry">
+<label>병부 수량</label>
+<input id="count">
 
-  <label>병부 수량</label>
-  <input id="count">
-
-  <button class="btn-main" onclick="save()">입력 / 업데이트</button>
-  <button class="btn-sub" onclick="load()">조회하기</button>
-  <button class="btn-danger" onclick="removeData()">삭제</button>
-  <button class="btn-sub" onclick="adminView()">운영진 전체조회</button>
-</div>
+<button class="save" onclick="save()">입력 / 업데이트</button>
+<button class="delete" onclick="remove()">삭제</button>
+<button class="admin" onclick="window.open(location.href)">운영진 조회</button>
 
 <table id="table"></table>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbziZj_ql1njCcKm6S6kWwWBMLBofNGWVIBn9R1GrLxFdvUEkH-UVbVp3e7nNtubI9ZL/exec";
+const API = 'https://script.google.com/macros/s/AKfycbwvcaFq2aEBsoHrBI67MfyrKmgCYbPgl6P6oII5C8xRj3V-P2fOlHZd1jZVXnvvuJls/exec';
 
-let rowsCache=[];
-let sortIdx=0, desc=true;
-
-window.onload = load;
-
-function save(){
-  const data={
-    nickname:nickname.value,
-    archer:archer.value,
-    spear:spear.value,
-    cavalry:cavalry.value,
-    shield:shield.value,
-    count:count.value
-  };
-  fetch(API_URL,{method:'POST',body:JSON.stringify(data)})
-  .then(()=>{ alert("저장 완료"); load();});
-}
-
-function removeData(){
-  const pw=prompt("삭제 비밀번호 입력");
-  if(pw!=="6575") return alert("비밀번호 틀림");
-  fetch(API_URL,{
+function save() {
+  fetch(API, {
     method:'POST',
-    body:JSON.stringify({delete:nickname.value})
-  }).then(()=>{ alert("삭제 완료"); load();});
+    body: JSON.stringify({
+      nickname: nickname.value,
+      spear: spear.value,
+      archer: archer.value,
+      shield: shield.value,
+      cavalry: cavalry.value,
+      count: count.value
+    })
+  }).then(load);
 }
 
-function load(){
-  fetch(API_URL)
-  .then(r=>r.json())
-  .then(rows=>{
-    rowsCache=rows;
-    render(rows);
+function remove() {
+  const pw = prompt('비밀번호 입력');
+  fetch(API, {
+    method:'POST',
+    body: JSON.stringify({
+      nickname: nickname.value,
+      password: pw,
+      _method:'DELETE'
+    })
+  }).then(load);
+}
+
+function load() {
+  fetch(API).then(r=>r.json()).then(rows=>{
+    table.innerHTML =
+      `<tr>
+        <th>닉네임</th><th>창병</th><th>궁병</th>
+        <th>방패병</th><th>기병</th><th>병부</th><th>최종업데이트</th>
+      </tr>` +
+      rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
   });
 }
 
-function render(rows){
-  table.innerHTML=
-  `<tr>
-    <th onclick="sortBy(0)">닉네임</th>
-    <th onclick="sortBy(2)">창병</th>
-    <th onclick="sortBy(1)">궁병</th>
-    <th onclick="sortBy(4)">방패</th>
-    <th onclick="sortBy(3)">기병</th>
-    <th onclick="sortBy(5)">병부</th>
-    <th onclick="sortBy(6)">최종 업데이트</th>
-  </tr>`+
-  rows.map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('');
-}
-
-function sortBy(i){
-  if(sortIdx===i) desc=!desc;
-  else{ sortIdx=i; desc=true;}
-  rowsCache.sort((a,b)=>{
-    if(i===0||i===6) return desc? b[i].localeCompare(a[i]):a[i].localeCompare(b[i]);
-    return desc? b[i]-a[i]:a[i]-b[i];
-  });
-  render(rowsCache);
-}
-
-function adminView(){
-  const pw=prompt("운영진 비밀번호");
-  if(pw!=="6575") return alert("비밀번호 틀림");
-  window.open(location.href,'_blank');
-}
+load();
 </script>
 </body>
 </html>
-
