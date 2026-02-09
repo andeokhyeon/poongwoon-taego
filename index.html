@@ -28,7 +28,7 @@ th, td { border: 1px solid #ccc; padding: 6px 10px; }
 <table id="table"></table>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxRCCWakieLXWBquhd1-zmc435AXJDRxgjpvMz-nI4KTR507FaIWXGLBYE8lT5w6Jl1/exec';
+const API_URL = "https://script.google.com/macros/s/AKfycbxRCCWakieLXWBquhd1-zmc435AXJDRxgjpvMz-nI4KTR507FaIWXGLBYE8lT5w6Jl1/exec";
 
 function save() {
   const data = {
@@ -43,31 +43,25 @@ function save() {
   fetch(API_URL, {
     method: 'POST',
     body: JSON.stringify(data)
-  }).then(() => {
+  })
+  .then(() => {
     alert('저장 완료');
     load();
-  });
-}
-
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }).then(() => {
-    alert('저장 완료');
-    load();
-  });
+  })
+  .catch(err => alert('에러: ' + err));
 }
 
 function load() {
   fetch(API_URL)
     .then(r => r.json())
     .then(rows => {
-      table.innerHTML =
+      document.getElementById('table').innerHTML =
         '<tr><th>닉</th><th>궁</th><th>창</th><th>기</th><th>방</th><th>병부</th></tr>' +
         rows.map(r =>
           `<tr><td>${r.join('</td><td>')}</td></tr>`
         ).join('');
-    });
+    })
+    .catch(err => alert('조회 에러: ' + err));
 }
 </script>
 
