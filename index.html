@@ -3,70 +3,163 @@
 <head>
 <meta charset="UTF-8">
 <title>풍운 태고 병력표</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-body { font-family: Arial; padding: 20px; }
-input { margin: 4px; }
-button { margin: 6px 0; }
-table { border-collapse: collapse; margin-top: 20px; }
-th, td { border: 1px solid #ccc; padding: 6px 10px; }
+body {
+  font-family: Arial, sans-serif;
+  padding: 16px;
+  max-width: 900px;
+  margin: auto;
+}
+h2 { text-align: center; }
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  box-sizing: border-box;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.admin {
+  background: #222;
+  color: #fff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+th {
+  background: #f4f4f4;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
 <h2>풍운 태고 병력표</h2>
 
-<input id="nickname" placeholder="닉네임"><br>
-<input id="archer" placeholder="궁병">
-<input id="spear" placeholder="창병">
-<input id="cavalry" placeholder="기병">
-<input id="shield" placeholder="방패">
-<input id="count" placeholder="병부수량"><br>
+<input id="nickname" placeholder="닉네임">
+
+<div class="grid">
+  <input id="archer" placeholder="궁병">
+  <input id="spear" placeholder="창병">
+  <input id="cavalry" placeholder="기병">
+  <input id="shield" placeholder="방패">
+</div>
+
+<input id="count" placeholder="병부 수량">
 
 <button onclick="save()">입력 / 업데이트</button>
 <button onclick="load()">조회하기</button>
+<button class="admin" onclick="adminView()">운영진 전체조회</button>
 
 <table id="table"></table>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxRCCWakieLXWBquhd1-zmc435AXJDRxgjpvMz-nI4KTR507FaIWXGLBYE8lT5w6Jl1/exec";
+const API_URL = 'https://script.google.com/macros/s/AKfycbxRCCWakieLXWBquhd1-zmc435AXJDRxgjpvMz-nI4KTR507FaIWXGLBYE8lT5w6Jl1/exec';
 
+let currentRows = [];
+let sortIndex = 0;
+let desc = true;
+
+/* 자동 조회 */
+window.onload = load;
+
+/* 저장 */
 function save() {
   const data = {
-    nickname: document.getElementById('nickname').value,
-    archer: document.getElementById('archer').value,
-    spear: document.getElementById('spear').value,
-    cavalry: document.getElementById('cavalry').value,
-    shield: document.getElementById('shield').value,
-    count: document.getElementById('count').value
+    nickname: nickname.value,
+    archer: archer.value,
+    spear: spear.value,
+    cavalry: cavalry.value,
+    shield: shield.value,
+    count: count.value
   };
 
   fetch(API_URL, {
     method: 'POST',
     body: JSON.stringify(data)
-  })
-  .then(() => {
+  }).then(() => {
     alert('저장 완료');
     load();
-  })
-  .catch(err => alert('에러: ' + err));
+  });
 }
 
+/* 조회 */
 function load() {
   fetch(API_URL)
     .then(r => r.json())
     .then(rows => {
-      document.getElementById('table').innerHTML =
-        '<tr><th>닉</th><th>궁</th><th>창</th><th>기</th><th>방</th><th>병부</th></tr>' +
-        rows.map(r =>
-          `<tr><td>${r.join('</td><td>')}</td></tr>`
-        ).join('');
-    })
-    .catch(err => alert('조회 에러: ' + err));
-
+      currentRows = rows;
+      render(rows);
+    });
 }
-window.onload = load;
+
+/* 테이블 렌더 */
+function render(rows) {
+  table.innerHTML =
+    `<tr>
+      <th onclick="sortBy(0)">닉</th>
+      <th onclick="sortBy(1)">궁</th>
+      <th onclick="sortBy(2)">창</th>
+      <th onclick="sortBy(3)">기</th>
+      <th onclick="sortBy(4)">방</th>
+      <th onclick="sortBy(5)">병부</th>
+    </tr>` +
+    rows.map(r =>
+      `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`
+    ).join('');
+}
+
+/* 정렬 */
+function sortBy(i) {
+  if (sortIndex === i) desc = !desc;
+  else { sortIndex = i; desc = true; }
+
+  currentRows.sort((a,b) =>
+    desc ? b[i] - a[i] || b[i].localeCompare?.(a[i]) 
+         : a[i] - b[i] || a[i].localeCompare?.(b[i])
+  );
+  render(currentRows);
+}
+
+/* 운영진 전체조회 */
+function adminView() {
+  const pw = prompt('운영진 비밀번호 입력');
+  if (pw !== '6575') {
+    alert('비밀번호 틀림');
+    return;
+  }
+  load();
+}
 </script>
 
 </body>
 </html>
-
