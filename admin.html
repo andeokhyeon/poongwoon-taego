@@ -5,7 +5,7 @@
 <title>운영진 병력 조회</title>
 <style>
 body {
-  background:#0f172a;
+  background:#020617;
   color:#e5e7eb;
   font-family:Pretendard, Arial;
   padding:30px;
@@ -17,22 +17,22 @@ table {
 }
 th,td {
   padding:12px;
+  border-bottom:1px solid #1e293b;
   text-align:center;
 }
 th {
   background:#1e293b;
   cursor:pointer;
 }
-tr:nth-child(even){background:#020617cc;}
 </style>
 </head>
 
 <body>
-<h2>📊 풍운 태고 병력표 (운영진)</h2>
+<h2>📊 풍운 태고 병력표</h2>
 <table id="table"></table>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbzaIF5qvsVjrzJVosl9eMlSvB1BT3GrXgFztZqtILI7Q4vq-nTfuKZT6kDBDtM-cNo/exec';
+const API = 'https://script.google.com/macros/s/AKfycbxYL3cFGM62EB0tzZpwNgcyW-6AOLSXp0LCREs51Z0UCEbqFmViDdaBE1nUXOeEBts/exec';
 let asc = true;
 
 fetch(API).then(r=>r.json()).then(render);
@@ -40,15 +40,17 @@ fetch(API).then(r=>r.json()).then(render);
 function render(rows){
   table.innerHTML =
   `<tr>
-    <th onclick="sort(0)">닉</th>
-    <th onclick="sort(1)">창</th>
-    <th onclick="sort(2)">궁</th>
-    <th onclick="sort(3)">방</th>
-    <th onclick="sort(4)">기</th>
+    <th onclick="sort(0)">닉네임</th>
+    <th onclick="sort(1)">창병</th>
+    <th onclick="sort(2)">궁병</th>
+    <th onclick="sort(3)">방패병</th>
+    <th onclick="sort(4)">기병</th>
     <th onclick="sort(5)">병부</th>
     <th onclick="sort(6)">업데이트</th>
   </tr>` +
-  rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  rows.map(r =>
+    `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`
+  ).join('');
 }
 
 function sort(i){
@@ -65,3 +67,4 @@ function sort(i){
 </script>
 </body>
 </html>
+
